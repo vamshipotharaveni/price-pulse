@@ -1,89 +1,16 @@
 import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { PlatformFilters } from "@/components/PlatformFilters";
-import { ProductCard, type Product } from "@/components/ProductCard";
+import { ProductCard } from "@/components/ProductCard";
 import { HeroSection } from "@/components/HeroSection";
-
-// TODO: remove mock data - replace with real API data
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Tata Salt, Iodised',
-    quantity: '1 kg',
-    image: 'https://images.unsplash.com/photo-1612165638932-4bb89c3e2e7b?w=400&h=400&fit=crop',
-    prices: [
-      { platform: 'Zepto', price: 22, originalPrice: 25, deliveryTime: '10 min', inStock: true, url: '#' },
-      { platform: 'Blinkit', price: 24, deliveryTime: '15 min', inStock: true, url: '#' },
-      { platform: 'BigBasket', price: 23, deliveryTime: '2 hours', inStock: true, url: '#' },
-      { platform: 'Swiggy', price: 26, deliveryTime: '20 min', inStock: false, url: '#' },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Amul Taaza Toned Fresh Milk',
-    quantity: '500 ml',
-    image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=400&fit=crop',
-    prices: [
-      { platform: 'Zepto', price: 28, deliveryTime: '10 min', inStock: true, url: '#' },
-      { platform: 'Blinkit', price: 27, deliveryTime: '15 min', inStock: true, url: '#' },
-      { platform: 'BigBasket', price: 29, deliveryTime: '2 hours', inStock: true, url: '#' },
-      { platform: 'Swiggy', price: 28, deliveryTime: '20 min', inStock: true, url: '#' },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Fresho Tomato - Hybrid',
-    quantity: '500 g',
-    image: 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400&h=400&fit=crop',
-    prices: [
-      { platform: 'Zepto', price: 18, deliveryTime: '10 min', inStock: true, url: '#' },
-      { platform: 'Blinkit', price: 16, originalPrice: 20, deliveryTime: '15 min', inStock: true, url: '#' },
-      { platform: 'BigBasket', price: 19, deliveryTime: '2 hours', inStock: true, url: '#' },
-      { platform: 'Swiggy', price: 17, deliveryTime: '20 min', inStock: true, url: '#' },
-    ],
-  },
-  {
-    id: '4',
-    name: 'Britannia Good Day Butter Cookies',
-    quantity: '200 g',
-    image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&h=400&fit=crop',
-    prices: [
-      { platform: 'Zepto', price: 45, deliveryTime: '10 min', inStock: true, url: '#' },
-      { platform: 'Blinkit', price: 42, originalPrice: 50, deliveryTime: '15 min', inStock: true, url: '#' },
-      { platform: 'BigBasket', price: 44, deliveryTime: '2 hours', inStock: true, url: '#' },
-      { platform: 'Swiggy', price: 46, deliveryTime: '20 min', inStock: true, url: '#' },
-    ],
-  },
-  {
-    id: '5',
-    name: 'Fresho Onion',
-    quantity: '1 kg',
-    image: 'https://images.unsplash.com/photo-1508747703725-719777637510?w=400&h=400&fit=crop',
-    prices: [
-      { platform: 'Zepto', price: 35, deliveryTime: '10 min', inStock: true, url: '#' },
-      { platform: 'Blinkit', price: 32, deliveryTime: '15 min', inStock: true, url: '#' },
-      { platform: 'BigBasket', price: 34, deliveryTime: '2 hours', inStock: true, url: '#' },
-      { platform: 'Swiggy', price: 36, deliveryTime: '20 min', inStock: true, url: '#' },
-    ],
-  },
-  {
-    id: '6',
-    name: 'India Gate Basmati Rice',
-    quantity: '1 kg',
-    image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
-    prices: [
-      { platform: 'Zepto', price: 165, deliveryTime: '10 min', inStock: true, url: '#' },
-      { platform: 'Blinkit', price: 160, originalPrice: 180, deliveryTime: '15 min', inStock: true, url: '#' },
-      { platform: 'BigBasket', price: 162, deliveryTime: '2 hours', inStock: true, url: '#' },
-      { platform: 'Swiggy', price: 168, deliveryTime: '20 min', inStock: true, url: '#' },
-    ],
-  },
-];
+import { Badge } from "@/components/ui/badge";
+import { products, categories } from "@/data/products";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentLocation, setCurrentLocation] = useState("400001");
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(["all"]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const handlePlatformToggle = (platformId: string) => {
     if (platformId === "all") {
@@ -97,22 +24,24 @@ export default function Home() {
   };
 
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter(product => {
+    return products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = !selectedCategory || product.category === selectedCategory;
       
       if (selectedPlatforms.includes("all")) {
-        return matchesSearch;
+        return matchesSearch && matchesCategory;
       }
 
-      const hasPlatform = product.prices.some(price =>
+      const prices = product.getPrices(product.defaultQuantity);
+      const hasPlatform = prices.some(price =>
         selectedPlatforms.some(platform =>
           price.platform.toLowerCase().includes(platform.toLowerCase())
         )
       );
 
-      return matchesSearch && hasPlatform;
+      return matchesSearch && hasPlatform && matchesCategory;
     });
-  }, [searchQuery, selectedPlatforms]);
+  }, [searchQuery, selectedPlatforms, selectedCategory]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,11 +60,36 @@ export default function Home() {
       />
 
       <main className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-3">Shop by Category</h2>
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            <Badge
+              variant={selectedCategory === null ? "default" : "outline"}
+              className="cursor-pointer whitespace-nowrap hover-elevate active-elevate-2"
+              onClick={() => setSelectedCategory(null)}
+              data-testid="badge-category-all"
+            >
+              All Categories
+            </Badge>
+            {categories.map((category) => (
+              <Badge
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                className="cursor-pointer whitespace-nowrap hover-elevate active-elevate-2"
+                onClick={() => setSelectedCategory(category)}
+                data-testid={`badge-category-${category}`}
+              >
+                {category}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
         {filteredProducts.length > 0 ? (
           <>
             <div className="mb-6">
               <h2 className="text-2xl font-semibold">
-                {searchQuery ? `Results for "${searchQuery}"` : "Popular Products"}
+                {searchQuery ? `Results for "${searchQuery}"` : selectedCategory || "All Products"}
               </h2>
               <p className="text-muted-foreground">
                 Found {filteredProducts.length} products
