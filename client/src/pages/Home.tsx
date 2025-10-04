@@ -160,7 +160,7 @@ export default function Home() {
       <footer className="border-t mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-muted-foreground">
-            <p>© 2024 Thanuja. Compare prices across Zepto, Blinkit, BigBasket, Swiggy Instamart, and Reliance.</p>
+            <p>© 2024 Price Pulse. Compare prices across Zepto, Blinkit, BigBasket, Swiggy Instamart, and Reliance.</p>
           </div>
         </div>
       </footer>
