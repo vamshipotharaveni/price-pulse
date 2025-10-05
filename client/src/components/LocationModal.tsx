@@ -33,9 +33,31 @@ export function LocationModal({ currentLocation, onLocationChange }: LocationMod
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const mockPincode = "400001";
-          onLocationChange(mockPincode);
-          setOpen(false);
+          const { latitude, longitude } = position.coords;
+
+          // Use Nominatim reverse geocoding to get address details (including postcode)
+          const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
+
+          fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then((res) => res.json())
+            .then((data) => {
+              const postcode = data?.address?.postcode;
+              if (postcode) {
+                onLocationChange(postcode);
+              } else if (data?.display_name) {
+                // fallback to human readable location if no postcode
+                onLocationChange(data.display_name.split(",").slice(0, 2).join(", "));
+              } else {
+                // last resort mock
+                onLocationChange("400001");
+              }
+              setOpen(false);
+            })
+            .catch((err) => {
+              console.error("Reverse geocoding failed:", err);
+              onLocationChange("400001");
+              setOpen(false);
+            });
         },
         (error) => {
           console.error("Geolocation error:", error);

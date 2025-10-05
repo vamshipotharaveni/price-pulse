@@ -23,7 +23,7 @@ export function Header({
           <div className="h-16 w-16 rounded-md bg-primary flex items-center justify-center" data-testid="img-logo">
             <ShoppingCart className="h-8 w-8 text-primary-foreground" />
           </div>
-          <span className="text-2xl font-bold text-foreground hidden sm:inline">Price Pulse</span>
+          <span className="text-2xl font-bold text-foreground hidden sm:inline">smart grocery shopping assistant</span>
         </div>
         
         <div className="flex-1 max-w-2xl mx-auto">

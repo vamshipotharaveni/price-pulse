@@ -12,7 +12,11 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  // allow overriding the API base URL via Vite env var VITE_API_BASE
+  const apiBase = (import.meta as any).env?.VITE_API_BASE as string | undefined;
+  const finalUrl = apiBase && url.startsWith("/") ? `${apiBase.replace(/\/+$/,'')}${url}` : url;
+
+  const res = await fetch(finalUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -29,7 +33,11 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
+    const apiBase = (import.meta as any).env?.VITE_API_BASE as string | undefined;
+    const rawUrl = queryKey.join("/") as string;
+    const finalUrl = apiBase && rawUrl.startsWith("/") ? `${apiBase.replace(/\/+$/,'')}${rawUrl}` : rawUrl;
+
+    const res = await fetch(finalUrl, {
       credentials: "include",
     });
 

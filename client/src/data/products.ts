@@ -1,5 +1,28 @@
 import type { QuantityOption } from "@/components/QuantitySelector";
 
+function encodeQuery(q: string) {
+  return encodeURIComponent(q.replace(/\s+/g, '+'));
+}
+
+function platformUrl(platform: string, productName: string) {
+  const q = encodeQuery(productName);
+  switch (platform) {
+    case 'Zepto':
+      return `https://www.zepto.com/search?query=${q}`;
+    case 'Blinkit':
+      return `https://www.blinkit.com/search?q=${q}`;
+    case 'BigBasket':
+      return `https://www.bigbasket.com/ps/?q=${q}`;
+    case 'Swiggy':
+      // Swiggy instamart search
+      return `https://www.swiggy.com/search?q=${q}`;
+    case 'Reliance':
+      return `https://www.reliancedigital.in/search?q=${q}`;
+    default:
+      return '#';
+  }
+}
+
 export interface PlatformPrice {
   platform: string;
   price: number;
@@ -22,7 +45,9 @@ export interface Product {
 export const categories = [
   "Vegetables",
   "Fruits",
+  "Dry Fruits",
   "Grains & Cereals",
+  "Flours",
   "Pulses & Legumes",
   "Oils & Ghee",
   "Spices",
@@ -68,35 +93,35 @@ function createProduct(
         originalPrice: qtySeededRandom(5) > 0.5 ? Math.round(basePrice + qtySeededRandom(1) * 5 + 5) : undefined,
         deliveryTime: "10 min",
         inStock: qtySeededRandom(2) > 0.1,
-        url: "#",
+        url: platformUrl("Zepto", name),
       },
       {
         platform: "Blinkit",
         price: Math.round(basePrice + qtySeededRandom(3) * 4),
         deliveryTime: "15 min",
         inStock: qtySeededRandom(4) > 0.1,
-        url: "#",
+        url: platformUrl("Blinkit", name),
       },
       {
         platform: "BigBasket",
         price: Math.round(basePrice + qtySeededRandom(5) * 6),
         deliveryTime: "2 hours",
         inStock: qtySeededRandom(6) > 0.05,
-        url: "#",
+        url: platformUrl("BigBasket", name),
       },
       {
         platform: "Swiggy",
         price: Math.round(basePrice + qtySeededRandom(7) * 7),
         deliveryTime: "20 min",
         inStock: qtySeededRandom(8) > 0.15,
-        url: "#",
+        url: platformUrl("Swiggy", name),
       },
       {
         platform: "Reliance",
         price: Math.round(basePrice + qtySeededRandom(9) * 5),
         deliveryTime: "Next day",
         inStock: qtySeededRandom(10) > 0.1,
-        url: "#",
+        url: platformUrl("Reliance", name),
       },
     ];
 
@@ -472,6 +497,37 @@ export const products: Product[] = [
     (qty) => {
       const multiplier = qty === "1 kg" ? 2 : 1;
       return Math.round(40 * multiplier);
+    }
+  ),
+  // Flours
+  createProduct(
+    "flour-besan",
+    "Besan (Gram Flour)",
+    "Flours",
+    "https://images.unsplash.com/photo-1598511726152-2f6b3e1f7f9b?w=400&h=400&fit=crop",
+    [
+      { value: 500, unit: "g", label: "500 g" },
+      { value: 1, unit: "kg", label: "1 kg" },
+    ],
+    "500 g",
+    (qty) => {
+      const multiplier = qty === "1 kg" ? 2 : 1;
+      return Math.round(80 * multiplier);
+    }
+  ),
+  createProduct(
+    "flour-ragi",
+    "Ragi Flour",
+    "Flours",
+    "https://images.unsplash.com/photo-1584270354949-3f6c3b1e5c3a?w=400&h=400&fit=crop",
+    [
+      { value: 500, unit: "g", label: "500 g" },
+      { value: 1, unit: "kg", label: "1 kg" },
+    ],
+    "500 g",
+    (qty) => {
+      const multiplier = qty === "1 kg" ? 2 : 1;
+      return Math.round(100 * multiplier);
     }
   ),
   createProduct(
@@ -1126,6 +1182,53 @@ export const products: Product[] = [
     (qty) => {
       const multiplier = qty === "1 kg" ? 2 : 1;
       return Math.round(60 * multiplier);
+    }
+  ),
+  // Dry Fruits
+  createProduct(
+    "dry-almonds",
+    "Almonds (Badam)",
+    "Dry Fruits",
+    "https://images.unsplash.com/photo-1604908177522-7f28d8df8b45?w=400&h=400&fit=crop",
+    [
+      { value: 100, unit: "g", label: "100 g" },
+      { value: 250, unit: "g", label: "250 g" },
+      { value: 500, unit: "g", label: "500 g" },
+    ],
+    "100 g",
+    (qty) => {
+      const multiplier = qty === "250 g" ? 2.5 : qty === "500 g" ? 5 : 1;
+      return Math.round(250 * multiplier);
+    }
+  ),
+  createProduct(
+    "dry-cashews",
+    "Cashews (Kaju)",
+    "Dry Fruits",
+    "https://images.unsplash.com/photo-1612068334114-0f6d5b9a8a8b?w=400&h=400&fit=crop",
+    [
+      { value: 100, unit: "g", label: "100 g" },
+      { value: 250, unit: "g", label: "250 g" },
+    ],
+    "100 g",
+    (qty) => {
+      const multiplier = qty === "250 g" ? 2.5 : 1;
+      return Math.round(300 * multiplier);
+    }
+  ),
+  createProduct(
+    "dry-raisins",
+    "Raisins (Kishmish)",
+    "Dry Fruits",
+    "https://images.unsplash.com/photo-1543362906-acfc16c67564?w=400&h=400&fit=crop",
+    [
+      { value: 100, unit: "g", label: "100 g" },
+      { value: 250, unit: "g", label: "250 g" },
+    ],
+    "100 g",
+    (qty) => {
+      const multiplier = qty === "250 g" ? 2.5 : 1;
+      return Math.round(90 * multiplier);
     }
   ),
   createProduct(

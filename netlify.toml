@@ -1,0 +1,13 @@
+[build]
+  publish = "dist/public"
+  command = "npm run build"
+
+[context.production.environment]
+  NODE_ENV = "production"
+
+[redirects]
+  # redirect all requests to index.html (single page app)
+  [[redirects]]
+    from = "/*"
+    to = "/index.html"
+    status = 200
